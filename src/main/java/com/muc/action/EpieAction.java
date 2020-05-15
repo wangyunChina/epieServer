@@ -779,4 +779,17 @@ public class EpieAction {
             return 0;
         }
     }
+    @Resource
+    AccountService accountService;
+    @ApiOperation(value = "查询我的账户",notes = "通过用户的openid")
+    @GetMapping("/myAccount")
+    public Acount myAccount(String openid){
+        try{
+            return accountService.select(openid);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
 }

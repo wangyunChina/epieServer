@@ -5,11 +5,6 @@ import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
 public interface AcountMapper {
-    @Delete({
-        "delete from acount",
-        "where id = #{id,jdbcType=INTEGER}"
-    })
-    int deleteByPrimaryKey(Integer id);
 
     @Insert({
         "insert into acount (id, acount_user_id, ",
@@ -26,14 +21,14 @@ public interface AcountMapper {
         "select",
         "id, acount_user_id, acount_money",
         "from acount",
-        "where id = #{id,jdbcType=INTEGER}"
+        "where acount_user_id = #{openid,jdbcType=VARCHAR}"
     })
     @Results({
         @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
         @Result(column="acount_user_id", property="acountUserId", jdbcType=JdbcType.VARCHAR),
         @Result(column="acount_money", property="acountMoney", jdbcType=JdbcType.DOUBLE)
     })
-    Acount selectByPrimaryKey(Integer id);
+    Acount selectByUserId(String openid);
 
     @UpdateProvider(type=AcountSqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(Acount record);
