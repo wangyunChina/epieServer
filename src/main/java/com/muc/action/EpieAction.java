@@ -422,6 +422,60 @@ public class EpieAction {
         }
         return  map;
     }
+
+    /*
+    * 用户申请成为企业用户
+    *
+    * */
+    @ApiOperation(value = "个人用户变更为企业用户",notes = "用户上传自己公司的一些信息，交由管理人员审核，通过后方可进入企业端")
+    @PostMapping("/tobeCompany")
+    public Map tobeCompany(Company company,HttpServletRequest request)
+    {
+
+      Map map=new <String,Object>HashMap();
+      try {
+          Company company1 = companyService.selectByOpenId(company.getOpenid());
+          if (company1 != null && company1.getCompanyReviewStatus() != 1) {
+              map.put("error", "您已经提交过一次申请了，请不要重复提交！");
+          } else if (company1 != null && company1.getCompanyReviewStatus() == 3) {
+              map.put("error", "您已经是企业用户了，无需重复申请！");
+          } else {
+              companyService.insert(company);
+              map.put("success", "申请提交成功");
+          }
+      }
+      catch (Exception e)
+      {
+          map.put("error","服务器异常，请联系客服！");
+      }
+      return map;
+    }
+    @ApiOperation(value = "个人用户查询自己是否是企业认证用户",notes = "1：提交申请，还未通过；2：提交过申请，未通过！；3:已经是企业用户；4:还没有提交给任何申请")
+    @PostMapping("/checkIsCompany")
+    public Map checkIsCompany(String openid,HttpServletRequest request)
+    {
+
+        Map map=new <String,Object>HashMap();
+        try {
+            Company company1 = companyService.selectByOpenId(openid);
+            if (company1 != null && company1.getCompanyReviewStatus() == 1) {
+                map.put("data", 1);
+            } else if (company1 != null && company1.getCompanyReviewStatus() == 2) {
+                map.put("data", 2);
+            } else if(company1 != null && company1.getCompanyReviewStatus() == 3){
+
+                map.put("data", 3);
+            }
+            else{
+                map.put("data", 4);
+            }
+        }
+        catch (Exception e)
+        {
+            map.put("error","服务器异常，请联系客服！");
+        }
+        return map;
+    }
     /*
     * 简历获取api
     * @param openid String 用户的openid
@@ -455,6 +509,7 @@ public class EpieAction {
     {
         HashMap<String,Object> map=new HashMap<>();
         try{
+            System.out.println("file："+resume.getFilePath()+"         openid:"+resume.getOpenid()+"    poster:"+resume.getPosterPath()+"  title:"+resume.getTitle()+resume.getResumeDesc() );
             resumeService.insert(resume);
             map.put("result", "success");
 

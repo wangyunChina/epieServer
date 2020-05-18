@@ -121,6 +121,7 @@ public interface CompanyMapper {
     List<Company> selectByLocation(String localtion);
 
 
+
     @UpdateProvider(type=CompanySqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(Company record);
 
