@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class PartimeJobViewModel implements Serializable {
    private ParttimeJob job;
-   private Company company;
+   private CompanyViewModel companyViewModel;
    private IndustryLevelOne industryLevelOne;
    private IndustryLevelTwo industryLevelTwo;
    private ArrayList<JobRequirements> jobRequirements;
@@ -37,12 +37,12 @@ public class PartimeJobViewModel implements Serializable {
         this.job = job;
     }
 
-    public Company getCompany() {
-        return company;
+    public CompanyViewModel getCompanyViewModel() {
+        return companyViewModel;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setCompanyViewModel(CompanyViewModel companyViewModel) {
+        this.companyViewModel = companyViewModel;
     }
 
     public IndustryLevelOne getIndustryLevelOne() {

@@ -24,6 +24,15 @@ public class Company implements Serializable {
     private Integer companyTypeLevel2;
 
     private String companyLicenceUrl;
+    private String companyPhone;
+
+    public String getCompanyPhone() {
+        return companyPhone;
+    }
+
+    public void setCompanyPhone(String companyPhone) {
+        this.companyPhone = companyPhone;
+    }
 
     private static final long serialVersionUID = 1L;
 

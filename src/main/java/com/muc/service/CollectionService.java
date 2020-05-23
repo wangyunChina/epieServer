@@ -1,14 +1,17 @@
 package com.muc.service;
 
 import com.muc.bean.Collection;
+import com.muc.viewModel.CollectionCompanyViewModel;
+import com.muc.viewModel.CollectionJobViewModel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public interface CollectionService {
     /*
     * 查询
     * */
+    public ArrayList<CollectionJobViewModel>searchMyCollectionJob(String openid);
+    public ArrayList<CollectionCompanyViewModel>searchMyCollectionCompany(String openid);
     public ArrayList<Collection>searchMyCollection(String openid);
     /*
     * 添加

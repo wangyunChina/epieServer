@@ -19,13 +19,13 @@ public interface CompanyMapper {
         "company_detail, company_location, ",
         "company_logo, company_review_status, ",
         "company_type_level1, company_type_level2, ",
-        "company_licence_url)",
+        "company_licence_url,company_phone)",
         "values (#{id,jdbcType=INTEGER}, #{openid,jdbcType=VARCHAR}, ",
         "#{companyName,jdbcType=VARCHAR}, #{companyDesc,jdbcType=VARCHAR}, ",
         "#{companyDetail,jdbcType=VARCHAR}, #{companyLocation,jdbcType=VARCHAR}, ",
         "#{companyLogo,jdbcType=VARCHAR}, #{companyReviewStatus,jdbcType=INTEGER}, ",
         "#{companyTypeLevel1,jdbcType=INTEGER}, #{companyTypeLevel2,jdbcType=INTEGER}, ",
-        "#{companyLicenceUrl,jdbcType=VARCHAR})"
+        "#{companyLicenceUrl,jdbcType=VARCHAR},#{companyPhone,jdbcType=VARCHAR})"
     })
     int insert(Company record);
 
@@ -35,7 +35,7 @@ public interface CompanyMapper {
     @Select({
         "select",
         "id, openid, company_name, company_desc, company_detail, company_location, company_logo, ",
-        "company_review_status, company_type_level1, company_type_level2, company_licence_url",
+        "company_review_status, company_type_level1, company_type_level2, company_licence_url,company_phone",
         "from company",
         "where id = #{id,jdbcType=INTEGER}"
     })
@@ -50,14 +50,15 @@ public interface CompanyMapper {
         @Result(column="company_review_status", property="companyReviewStatus", jdbcType=JdbcType.INTEGER),
         @Result(column="company_type_level1", property="companyTypeLevel1", jdbcType=JdbcType.INTEGER),
         @Result(column="company_type_level2", property="companyTypeLevel2", jdbcType=JdbcType.INTEGER),
-        @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR)
+        @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_phone", property="companyPhone", jdbcType=JdbcType.VARCHAR)
     })
     Company selectByPrimaryKey(Integer id);
 
     @Select({
             "select",
             "id, openid, company_name, company_desc, company_detail, company_location, company_logo, ",
-            "company_review_status, company_type_level1, company_type_level2, company_licence_url",
+            "company_review_status, company_type_level1, company_type_level2, company_licence_url,company_phone",
             "from company",
             "where openid = #{openid,jdbcType=VARCHAR}"
     })
@@ -72,14 +73,15 @@ public interface CompanyMapper {
             @Result(column="company_review_status", property="companyReviewStatus", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level1", property="companyTypeLevel1", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level2", property="companyTypeLevel2", jdbcType=JdbcType.INTEGER),
-            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR)
+            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_phone", property="companyPhone", jdbcType=JdbcType.VARCHAR)
     })
     Company selectByOpenid(String openid);
 
     @Select({
             "select",
             "id, openid, company_name, company_desc, company_detail, company_location, company_logo, ",
-            "company_review_status, company_type_level1, company_type_level2, company_licence_url",
+            "company_review_status, company_type_level1, company_type_level2, company_licence_url,company_phone",
             "from company",
             "where 1 = 1 limit #{limit,jdbcType=INTEGER}"
     })
@@ -94,14 +96,15 @@ public interface CompanyMapper {
             @Result(column="company_review_status", property="companyReviewStatus", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level1", property="companyTypeLevel1", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level2", property="companyTypeLevel2", jdbcType=JdbcType.INTEGER),
-            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR)
+            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_phone", property="companyPhone", jdbcType=JdbcType.VARCHAR)
     })
     List<Company> selectAll(int limit);
 
     @Select({
             "select",
             "id, openid, company_name, company_desc, company_detail, company_location, company_logo, ",
-            "company_review_status, company_type_level1, company_type_level2, company_licence_url",
+            "company_review_status, company_type_level1, company_type_level2, company_licence_url,company_phone",
             "from company",
             "where company_location like '%'||#{localtion,jdbcType=VARCHAR}||'%'"
     })
@@ -116,7 +119,8 @@ public interface CompanyMapper {
             @Result(column="company_review_status", property="companyReviewStatus", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level1", property="companyTypeLevel1", jdbcType=JdbcType.INTEGER),
             @Result(column="company_type_level2", property="companyTypeLevel2", jdbcType=JdbcType.INTEGER),
-            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR)
+            @Result(column="company_licence_url", property="companyLicenceUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_phone", property="companyPhone", jdbcType=JdbcType.VARCHAR)
     })
     List<Company> selectByLocation(String localtion);
 
@@ -137,6 +141,7 @@ public interface CompanyMapper {
           "company_type_level1 = #{companyTypeLevel1,jdbcType=INTEGER},",
           "company_type_level2 = #{companyTypeLevel2,jdbcType=INTEGER},",
           "company_licence_url = #{companyLicenceUrl,jdbcType=VARCHAR}",
+            "company_phone = #{companyPhone,jdbcType=VARCHAR}",
         "where id = #{id,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(Company record);

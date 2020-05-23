@@ -53,6 +53,10 @@ public class CompanySqlProvider {
         if (record.getCompanyLicenceUrl() != null) {
             VALUES("company_licence_url", "#{companyLicenceUrl,jdbcType=VARCHAR}");
         }
+        if(record.getCompanyPhone()!=null)
+        {
+            VALUES("company_phone","#{companyPhone,jdbcType=VARCHAR}");
+        }
         
         return SQL();
     }
@@ -99,6 +103,10 @@ public class CompanySqlProvider {
         
         if (record.getCompanyLicenceUrl() != null) {
             SET("company_licence_url = #{companyLicenceUrl,jdbcType=VARCHAR}");
+        }
+        if(record.getCompanyPhone()!=null)
+        {
+            VALUES("company_phone","#{companyPhone,jdbcType=VARCHAR}");
         }
         
         WHERE("id = #{id,jdbcType=INTEGER}");

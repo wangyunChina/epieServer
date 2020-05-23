@@ -10,8 +10,7 @@ public class ResourceConfigAdapter extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //获取文件的真实路径 work_project代表项目工程名 需要更改
-        String path = System.getProperty("user.dir")+"\\epie\\src\\main\\resources\\static\\userfile\\";
-        System.out.println(path);
+        String path = System.getProperty("user.dir")+"\\userfile\\";
         String os = System.getProperty("os.name");
         if (os.toLowerCase().startsWith("win")) {
             registry.addResourceHandler("/userfile/**").

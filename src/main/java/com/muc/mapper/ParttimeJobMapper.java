@@ -95,7 +95,7 @@ public interface ParttimeJobMapper {
             "job_wages_confirm_way, job_wages_low, job_wages_high, job_location, job_type_level1, ",
             "job_type_level2, job_review_status, job_create_time, job_end_type",
             "from parttimejob",
-            "where job_name like '%'||#{name,jdbcType=VARCHAR}||'%' and job_review_status=3"
+            "where job_name like #{name,jdbcType=VARCHAR} and job_review_status=3"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -121,8 +121,8 @@ public interface ParttimeJobMapper {
             "select *",
 
             "from parttimejob",
-            "where job_reginal like '%'||#{riginal,jdbcType=VARCHAR}||'%' and job_review_status=3 ",
-            " or  job_location like '%'||#{riginal,jdbcType=VARCHAR}||'%' and job_review_status=3 "
+            "where job_reginal like #{riginal,jdbcType=VARCHAR} and job_review_status=3 ",
+            " or  job_location like #{riginal,jdbcType=VARCHAR} and job_review_status=3 "
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -154,7 +154,7 @@ public interface ParttimeJobMapper {
             "job_wages_confirm_way, job_wages_low, job_wages_high, job_location, job_type_level1, ",
             "job_type_level2, job_review_status, job_create_time, job_end_type",
             "from parttimejob",
-            "where job_end_type like '%'||#{type,jdbcType=INTEGER}||'%' and job_review_status=3"
+            "where job_end_type like #{type,jdbcType=INTEGER} and job_review_status=3"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -183,7 +183,7 @@ public interface ParttimeJobMapper {
             "job_wages_confirm_way, job_wages_low, job_wages_high, job_location, job_type_level1, ",
             "job_type_level2, job_review_status, job_create_time, job_end_type",
             "from parttimejob",
-            "where job_name like '%'||#{name,jdbcType=VARCHAR}||'%' and job_reginal like '%'#{riginal,jdbcType=VARCHAR}'%' and job_review_status=3"
+            "where job_name like #{name,jdbcType=VARCHAR} and job_reginal like #{riginal,jdbcType=VARCHAR} and job_review_status=3"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),

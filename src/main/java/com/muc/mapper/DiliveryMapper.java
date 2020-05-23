@@ -1,6 +1,7 @@
 package com.muc.mapper;
 
 import com.muc.bean.Dilivery;
+import com.muc.viewModel.DiliverViewModel;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
@@ -68,4 +69,19 @@ public interface DiliveryMapper {
             @Result(column="diliver_status_id", property="diliverStatusId", jdbcType=JdbcType.INTEGER)
     })
    ArrayList<Dilivery> selectByOpenid(String openid);
+    @Select({
+     "select * from diliver_view where userid=#{openid,jdbcType=VARCHAR}"
+    })
+    @Results({
+            @Result(column="diliverid", property="diliverid", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="userid", property="userid", jdbcType=JdbcType.VARCHAR),
+            @Result(column="jobid", property="jobid", jdbcType=JdbcType.INTEGER),
+            @Result(column="optiontime", property="optiontime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="statu", property="statu", jdbcType=JdbcType.VARCHAR),
+            @Result(column="job_name", property="jobname", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_logo", property="companylogo", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_name", property="companyname", jdbcType=JdbcType.VARCHAR)
+
+    })
+    ArrayList<DiliverViewModel> selectByOpenidView(String openid);
 }

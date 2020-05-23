@@ -2,20 +2,29 @@ package com.muc.service;
 
 import com.muc.bean.Collection;
 import com.muc.mapper.CollectionMapper;
+import com.muc.viewModel.CollectionCompanyViewModel;
+import com.muc.viewModel.CollectionJobViewModel;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 @Service
 public class CollectionServiceImp implements CollectionService {
 @Resource
 CollectionMapper collectionMapper;
     @Override
-    public ArrayList<Collection >searchMyCollection(String openid) {
+    public ArrayList<CollectionJobViewModel>searchMyCollectionJob(String openid) {
+        return collectionMapper.selectJobByUserId(openid);
+    }
 
+    @Override
+    public ArrayList<CollectionCompanyViewModel> searchMyCollectionCompany(String openid) {
+        return collectionMapper.selectCompanyByUserId(openid);
+    }
 
-
+    @Override
+    public ArrayList<Collection> searchMyCollection(String openid) {
         return collectionMapper.selectByUserId(openid);
     }
 

@@ -9,7 +9,7 @@ spring:
   application:
     name: epie
   datasource:
-    url: jdbc:mysql://localhost:3306/epie?serverTimezone=UTC
-    username: root
-    password: 123321
+    url: jdbc:mysql://rm-bp132k4d3i28zu7928o.mysql.rds.aliyuncs.com:3306/epie?serverTimezone=UTC
+    username: epie
+    password: Epie@cloud
     driver-class-name: com.mysql.cj.jdbc.Driver

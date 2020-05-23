@@ -4,18 +4,22 @@ import com.muc.bean.*;
 import com.muc.bean.Collection;
 import com.muc.service.*;
 import com.muc.util.AesCbcUtil;
-import com.muc.viewModel.CompanyViewModel;
-import com.muc.viewModel.DiliverViewModel;
-import com.muc.viewModel.PartimeJobViewModel;
+import com.muc.viewModel.*;
 import io.swagger.annotations.*;
 import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /*
@@ -131,6 +135,10 @@ public class EpieAction {
             if(userService.check(openid)==null)
             {
                 userService.reg(epieUser);
+               Acount acount= new Acount();
+               acount.setAcountMoney(0.0);
+               acount.setAcountUserId(openid);
+                accountService.create(acount);
             }
 
         }catch (Exception e) {
@@ -142,7 +150,7 @@ public class EpieAction {
     @PostMapping(value = "/uploadPhoto")
     @ResponseBody
     @CrossOrigin
-    public Map<String, String> uploadPhoto(MultipartFile photo, HttpServletRequest request) {
+    public Map<String, String> uploadPhoto(MultipartFile photo, HttpServletRequest request) throws IOException {
         Map<String, String> ret = new HashMap<String, String>();
         if (photo == null) {
             ret.put("type", "error");
@@ -162,17 +170,21 @@ public class EpieAction {
             return ret;
         }
         //获取项目根目录加上图片目录 webapp/static/imgages/upload/
-        String savePath = "C:/Users/王云/IdeaProjects/cloud/epie/src/main/resources/static/userfile/";
+        String savePath = "File/image/upload";
         System.out.println(savePath);
+        Path directory = Paths.get(savePath);
         File savePathFile = new File(savePath);
-        if (!savePathFile.exists()) {
-            //若不存在该目录，则创建目录
-            savePathFile.mkdir();
+        if(!Files.exists(directory)){
+            Files.createDirectories(directory);
         }
+        InputStream inputStream =photo.getInputStream();
         String filename = new Date().getTime() + "." + suffix;
+
+
         try {
+            long copy = Files.copy(inputStream, directory.resolve(filename));
             //将文件保存指定目录
-            photo.transferTo(new File(savePath + filename));
+
         } catch (Exception e) {
             ret.put("type", "error");
             ret.put("msg", "保存文件异常！");
@@ -181,9 +193,19 @@ public class EpieAction {
         }
         ret.put("type", "success");
         ret.put("msg", "上传图片成功！");
-        ret.put("filepath", "C:/Users/王云/IdeaProjects/cloud/epie/src/main/resources/static/userfile/");
         ret.put("filename", filename);
         return ret;
+    }
+
+    @GetMapping("/getfile/{name}")
+    public void getImage(HttpServletResponse response, @PathVariable("name") String name) throws IOException {
+
+        response.setContentType("multipart/form-data;charset=utf-8");
+        response.setHeader("Content-Disposition", "inline; filename=girls.png");
+        ServletOutputStream outputStream = response.getOutputStream();
+        outputStream.write(Files.readAllBytes(Paths.get("File/image/upload").resolve(name)));
+        outputStream.flush();
+        outputStream.close();
     }
     @ApiOperation(value = "消息已读更新",notes = "用户读取消息后更新消息已读")
     @PostMapping("/setMessageHasRead")
@@ -209,7 +231,7 @@ public class EpieAction {
         paras.add(new TemplateParam("thing3","工资已到账"));
         template.setTemplateParamList(paras);
         String requestUrl="https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=ACCESS_TOKEN";
-        String Access_Token="33_JZIARzjWzNFTrDDcoCJhzhJJEuAVJzQd6gjeHiYap0xeKaaf_6kuc-YloV2nr95XVbuN8W65WEQBPkoja1JXLpvd4A5lcRI9Je3czLlYqR9KwRj450rwxx-VKL3yXVARJJnXOG6PIWgCzITyVGBbAJAKVQ";
+        String Access_Token="33_INsacYO0Pqmvs3I7WIo5fhRBX_MWXGX19NczTeLRiTy-fBmaIDTV3O9CLsB5_TyK_rlSjmqjCz5LkHXKJzqEVEmecmh-itXo-lbegLa0k1iDEwlnhBcmQVv5nURrkdg4v81X6j1jYqJYRnTrOQMeAHACEA";
         requestUrl=requestUrl.replace("ACCESS_TOKEN", Access_Token);
         System.out.println(template.toJSON().toString());
 
@@ -251,12 +273,18 @@ public class EpieAction {
             }
             else{
                 joblist1=partimeJobService.selectAll(20);
+
             }
             for (ParttimeJob i : joblist1
             ) {
                 PartimeJobViewModel temp = new PartimeJobViewModel();
                 temp.setJob(i);
-                temp.setCompany(companyService.selectById(i.getCompanyid()));
+                CompanyViewModel ss=new CompanyViewModel();
+                Company company=companyService.selectById(i.getCompanyid());
+                ss.setCompany(company);
+                ss.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                ss.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
+                temp.setCompanyViewModel(ss);
                 viewIndexList.add(temp);
             }
             /*如果数据少于10那么查询补充*/
@@ -269,6 +297,41 @@ public class EpieAction {
             e.printStackTrace();
         }
 
+        return map;
+    }
+    /*
+    * 兼职搜索
+    * 通过关键字
+    * */
+    @ApiOperation(value = "搜索兼职",notes = "只是根据名称简单的搜索")
+    @GetMapping("/search")
+    public Map search(String keyword){
+        Map<String,Object> map  =new HashMap<String, Object>();
+        List<ParttimeJob> joblist1=null;
+        List<PartimeJobViewModel> viewIndexList=new ArrayList<>();
+        try{
+
+            joblist1=partimeJobService.selectByName(keyword);
+            for (ParttimeJob i : joblist1
+            ) {
+                PartimeJobViewModel temp = new PartimeJobViewModel();
+                temp.setJob(i);
+                CompanyViewModel ss=new CompanyViewModel();
+                Company company=companyService.selectById(i.getCompanyid());
+                ss.setCompany(company);
+                ss.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                ss.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
+                temp.setCompanyViewModel(ss);
+                viewIndexList.add(temp);
+            }
+            /*如果数据少于10那么查询补充*/
+            map.put("result","success");
+            map.put("data",viewIndexList);
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("result", "fail");
+            map.put("errorMessage", e.getMessage());
+        }
         return map;
     }
     /*
@@ -289,7 +352,12 @@ public class EpieAction {
                 PartimeJobViewModel viewIndex = new PartimeJobViewModel();
                 if (job != null) {
                     viewIndex.setJob(job);
-                    viewIndex.setCompany(companyService.selectById(job.getCompanyid()));
+                    CompanyViewModel ss=new CompanyViewModel();
+                    Company company=companyService.selectById(job.getCompanyid());
+                    ss.setCompany(company);
+                    ss.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                    ss.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
+                    viewIndex.setCompanyViewModel(ss);
                     viewIndex.setIndustryLevelOne(levelOneService.selectById(job.getJobTypeLevel1()));
                     viewIndex.setIndustryLevelTwo(levelTwoService.selectById(job.getJobTypeLevel2()));
                     viewIndex.setJobDescription((ArrayList<JobDescription>) descriptionService.selectByJobId(job.getId()));
@@ -335,7 +403,12 @@ public class EpieAction {
                     for (ParttimeJob j : list) {
                         PartimeJobViewModel viewIndex = new PartimeJobViewModel();
                         viewIndex.setJob(j);
-                        viewIndex.setCompany(companyService.selectById(j.getCompanyid()));
+                        CompanyViewModel ss=new CompanyViewModel();
+                        Company company=companyService.selectById(j.getCompanyid());
+                        ss.setCompany(company);
+                        ss.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                        ss.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
+                        viewIndex.setCompanyViewModel(ss);
                         viewIndex.setIndustryLevelOne(levelOneService.selectById(j.getJobTypeLevel1()));
                         viewIndex.setIndustryLevelTwo(levelTwoService.selectById(j.getJobTypeLevel2()));
                         viewIndex.setJobDescription((ArrayList<JobDescription>) descriptionService.selectByJobId(j.getId()));
@@ -358,7 +431,12 @@ public class EpieAction {
                     for (ParttimeJob j : list) {
                         PartimeJobViewModel viewIndex = new PartimeJobViewModel();
                         viewIndex.setJob(j);
-                        viewIndex.setCompany(companyService.selectById(j.getCompanyid()));
+                        CompanyViewModel ss=new CompanyViewModel();
+                        Company company=companyService.selectById(j.getCompanyid());
+                        ss.setCompany(company);
+                        ss.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                        ss.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
+                        viewIndex.setCompanyViewModel(ss);
                         viewIndex.setIndustryLevelOne(levelOneService.selectById(j.getJobTypeLevel1()));
                         viewIndex.setIndustryLevelTwo(levelTwoService.selectById(j.getJobTypeLevel2()));
                         viewIndex.setJobDescription((ArrayList<JobDescription>) descriptionService.selectByJobId(j.getId()));
@@ -395,12 +473,19 @@ public class EpieAction {
                     CompanyViewModel temp = new CompanyViewModel();
                     ArrayList<PartimeJobViewModel> companyViewModels = new ArrayList<>();
                     temp.setCompany(company);
+                    temp.setIndustryLevelOne(levelOneService.selectById(company.getCompanyTypeLevel1()));
+                    temp.setIndustryLevelTwo(levelTwoService.selectById(company.getCompanyTypeLevel2()));
                     ArrayList<ParttimeJob> list = (ArrayList<ParttimeJob>) partimeJobService.selectByCompanyId(company.getId());
 
                     for (ParttimeJob j : list) {
                         PartimeJobViewModel viewIndex = new PartimeJobViewModel();
                         viewIndex.setJob(j);
-                        viewIndex.setCompany(companyService.selectById(j.getCompanyid()));
+                        CompanyViewModel ss=new CompanyViewModel();
+                        Company company1=companyService.selectById(j.getCompanyid());
+                        ss.setCompany(company1);
+                        ss.setIndustryLevelOne(levelOneService.selectById(company1.getCompanyTypeLevel1()));
+                        ss.setIndustryLevelTwo(levelTwoService.selectById(company1.getCompanyTypeLevel2()));
+                        viewIndex.setCompanyViewModel(ss);
                         viewIndex.setIndustryLevelOne(levelOneService.selectById(j.getJobTypeLevel1()));
                         viewIndex.setIndustryLevelTwo(levelTwoService.selectById(j.getJobTypeLevel2()));
                         viewIndex.setJobDescription((ArrayList<JobDescription>) descriptionService.selectByJobId(j.getId()));
@@ -447,6 +532,7 @@ public class EpieAction {
       catch (Exception e)
       {
           map.put("error","服务器异常，请联系客服！");
+          e.printStackTrace();
       }
       return map;
     }
@@ -460,11 +546,14 @@ public class EpieAction {
             Company company1 = companyService.selectByOpenId(openid);
             if (company1 != null && company1.getCompanyReviewStatus() == 1) {
                 map.put("data", 1);
+                map.put("detail",company1);
             } else if (company1 != null && company1.getCompanyReviewStatus() == 2) {
                 map.put("data", 2);
+                map.put("detail",company1);
             } else if(company1 != null && company1.getCompanyReviewStatus() == 3){
 
                 map.put("data", 3);
+                map.put("detail",company1);
             }
             else{
                 map.put("data", 4);
@@ -705,7 +794,7 @@ public class EpieAction {
     }
     @Resource
     CollectionService collectionService;
-    @ApiOperation(value = "获取我的收藏",notes="读取我的收藏")
+    @ApiOperation(value = "获取我的收藏",notes="读取我的收藏:true的时候是兼职 0的时候是公司")
     @GetMapping("/getMyCollections")
     public Map getMyCollections(String openid,HttpServletRequest request)
     {
@@ -715,22 +804,13 @@ public class EpieAction {
         try {
             if(openid!=null)
             {
-                ArrayList<Collection> temp=collectionService.searchMyCollection(openid);
-                for(Collection i :temp)
-                {
-                    if(i.getCollectionType())
-                    {
-                        list1.add(partimeJobService.selectById(i.getObjectId()));
-                    }
-                    else
-                    {
-                        list2.add(companyService.selectById(i.getObjectId()));
-                    }
-                }
+                ArrayList<CollectionJobViewModel> temp=collectionService.searchMyCollectionJob(openid);
+                ArrayList<CollectionCompanyViewModel> temp1=collectionService.searchMyCollectionCompany(openid);
+
 
                 map.put("result","success");
-                map.put("company",list1);
-                map.put("parttimejob",list2);
+                map.put("parttimejob",temp);
+                map.put("company",temp1);
             }
             else{
                 map.put("result", "fail");
@@ -754,7 +834,7 @@ public class EpieAction {
 
             for(Collection i:collectionService.searchMyCollection(collection.getUserId()))
             {
-                if(i.getObjectId()==collection.getObjectId()&&i.getUserId().equals(collection.getUserId())) {
+                if(i.getObjectId()==collection.getObjectId()&&i.getUserId().equals(collection.getUserId())&&i.getCollectionType()==collection.getCollectionType()) {
                     tag = 1;
                     break;
                 }
@@ -796,12 +876,7 @@ public class EpieAction {
         ArrayList<DiliverViewModel> data=new ArrayList<>();
         try{
 
-            for(Dilivery i:diliveryService.seletMyDilivery(openid)){
-                DiliverViewModel temp=new DiliverViewModel();
-                temp.setDilivery(i);
-                temp.setJob(partimeJobService.selectById(i.getId()));
-                data.add(temp);
-            }
+            data=diliveryService.seletMyDiliveryView(openid);
             map.put("result","success");
             map.put("data",data);
         }catch (Exception e){
@@ -815,10 +890,18 @@ public class EpieAction {
     public int AddDilivery(Dilivery dilivery,HttpServletRequest request)
     {
         try{
+            for(Dilivery i:diliveryService.seletMyDilivery(dilivery.getDiliverUserId())) {
+                if(i.getDiliverJobId()==dilivery.getDiliverJobId())
+                {
+                    return 2;
+                }
+            }
+
             diliveryService.insert(dilivery);
             return 1;
         }catch (Exception e)
         {
+            e.printStackTrace();
             return 0;
         }
     }

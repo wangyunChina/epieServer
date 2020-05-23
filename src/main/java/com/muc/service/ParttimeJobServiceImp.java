@@ -12,7 +12,8 @@ public class ParttimeJobServiceImp implements PartimeJobService {
     ParttimeJobMapper parttimeJobMapper;
     @Override
     public List<ParttimeJob> selectByName(String name) {
-        return parttimeJobMapper.selectByName(name);
+        String temp="%"+name+"%";
+        return parttimeJobMapper.selectByName(temp);
     }
 
     @Override
@@ -22,6 +23,8 @@ public class ParttimeJobServiceImp implements PartimeJobService {
 
     @Override
     public List<ParttimeJob> selectByReginal(String reginal) {
+        reginal="%"+reginal+"%";
+
         return parttimeJobMapper.selectByOrigin(reginal);
     }
 
@@ -32,6 +35,8 @@ public class ParttimeJobServiceImp implements PartimeJobService {
 
     @Override
     public List<ParttimeJob> selectByReginalAndName(String reginal, String name) {
+        reginal="%"+reginal+"%";
+        name="%"+name+"%";
         return parttimeJobMapper.selectByOriginAndName(reginal,name);
     }
 
