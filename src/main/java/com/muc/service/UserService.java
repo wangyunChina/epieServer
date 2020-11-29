@@ -5,6 +5,7 @@ import com.muc.bean.EpieUser;
 public interface UserService {
 
     public String loginByWeixin(String code, String encryptedData, String iv);
+    public String loginByWeixinCom(String code, String encryptedData, String iv);
     public EpieUser check(String openid);
     public int reg(EpieUser epieUser);
 }

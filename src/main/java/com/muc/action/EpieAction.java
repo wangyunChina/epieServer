@@ -40,7 +40,7 @@ public class EpieAction {
     * @param accept 消息接收方
     * */
     @GetMapping("/gethistorymessage")
-    public Map<String,Object> getHistoryMessage(String send,String accept,HttpServletRequest request)
+    public Map<String,Object> getHistoryMessage(String send,String accept)
     {
         Map<String,Object> map  =new HashMap<String, Object>();
            try {
@@ -103,12 +103,17 @@ public class EpieAction {
     }
     @ApiOperation(value = "登录方法",notes = "通过微信登录是第一次进入系统则将用户信息加入本地数据库")
     @GetMapping("/login_by_weixin")
-    public Map loginByWeixin(String code, String encryptedData, String iv, HttpServletRequest request)
+    public Map loginByWeixin(int clientType,String code, String encryptedData, String iv, HttpServletRequest request)
     {
         Map<String,Object> map  =new HashMap<String, Object>();
-
-        String sendGet=userService.loginByWeixin(code,encryptedData,iv); //根据code去调用接口获取用户openid和session_key
-
+        String sendGet="";
+        if(clientType==0) {
+            sendGet = userService.loginByWeixin(code, encryptedData, iv); //根据code去调用接口获取用户openid和session_key
+        }
+        else
+        {
+            sendGet = userService.loginByWeixinCom(code, encryptedData, iv); //根据code去调用接口获取用户openid和session_key
+        }
         JSONObject json = JSONObject.fromObject(sendGet);
         System.out.println("返回过来的json数据:"+json.toString());
         String sessionkey=json.get("session_key").toString(); //会话秘钥
@@ -164,9 +169,9 @@ public class EpieAction {
         }
         //获取文件后缀
         String suffix = photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf(".") + 1, photo.getOriginalFilename().length());
-        if (!"jpg,jpeg,gif,png,word,pdf,m4a,mp3,mp4".toUpperCase().contains(suffix.toUpperCase())) {
+        if (!"jpg,jpeg,gif,png,word,pdf,m4a,mp3,mp4,avi".toUpperCase().contains(suffix.toUpperCase())) {
             ret.put("type", "error");
-            ret.put("msg", "请选择jpg,jpeg,gif,png,word,pdf,m4a,mp3,mp4格式的文件！");
+            ret.put("msg", "请选择jpg,jpeg,gif,png,word,pdf,m4a,mp3,mp4,avi格式的文件！");
             return ret;
         }
         //获取项目根目录加上图片目录 webapp/static/imgages/upload/
