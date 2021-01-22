@@ -1,12 +1,12 @@
 package com.muc.action;
 
+import com.alibaba.fastjson.JSONObject;
 import com.muc.bean.*;
 import com.muc.bean.Collection;
 import com.muc.service.*;
 import com.muc.util.AesCbcUtil;
 import com.muc.viewModel.*;
 import io.swagger.annotations.*;
-import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,14 +114,14 @@ public class EpieAction {
         {
             sendGet = userService.loginByWeixinCom(code, encryptedData, iv); //根据code去调用接口获取用户openid和session_key
         }
-        JSONObject json = JSONObject.fromObject(sendGet);
+        JSONObject json = JSONObject.parseObject(sendGet);
         System.out.println("返回过来的json数据:"+json.toString());
         String sessionkey=json.get("session_key").toString(); //会话秘钥
         String openid=json.get("openid").toString(); //用户唯一标识
         try{
             //拿到用户session_key和用户敏感数据进行解密，拿到用户信息。
             String decrypts= AesCbcUtil.decrypt(encryptedData,sessionkey,iv,"utf-8");//解密
-            JSONObject jsons = JSONObject.fromObject(decrypts);
+            JSONObject jsons = JSONObject.parseObject(decrypts);
             System.out.println(jsons);
             String nickName=jsons.get("nickName").toString(); //用户昵称
             String avatarUrl=jsons.get("avatarUrl").toString(); //用户头像

@@ -1,6 +1,5 @@
 package com.muc.util;
 
-import net.sf.json.JSONObject;
 
 public class GetWageMessage {
    public static String wagesMessageTempId="YCqqfkTnsuKMznt670NXVOmD2i-8lcfuZvSD9plSFqE";
