@@ -10,4 +10,6 @@ import org.springframework.stereotype.Component;
 public class MessageConfig {
     @Value("${message.key.package.number}")
     public static int packageNum=4;
+    @Value("${message.key.length}")
+    public static int keyLength=16;
 }

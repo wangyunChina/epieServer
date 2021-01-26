@@ -16,14 +16,14 @@ public class PackageUtil<T> {
         /*key的length为16*/
 
         byte[] bytes = message.getBytes();
-        ArrayList<String> keyStr = split(key, 4);
-        ArrayList<String> messageStr = split(message, message.length() / 4);
+        ArrayList<String> keyStr = split(key, key.length()/MessageConfig.packageNum);
+        ArrayList<String> messageStr = split(message, message.length() / MessageConfig.packageNum);
         ArrayList<String> newKey = new ArrayList<>();
         for (String i : keyStr) {
             newKey.add(getFlower(i));
         }
         StringBuilder contentBuilder = new StringBuilder();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < MessageConfig.packageNum; i++) {
             contentBuilder.append(messageStr.get(i)).append(newKey.get(i));
         }
         return contentBuilder.toString();
@@ -84,12 +84,12 @@ public class PackageUtil<T> {
         for (char i : chars) {
             if (stack.isEmpty()) {
                 stack.push(i);
-            } else if (stack.peek().equals(i) && stringBuilder.toString().length() < 4) {
+            } else if (stack.peek().equals(i) && stringBuilder.toString().length() <MessageConfig.keyLength/MessageConfig.packageNum) {
                 stringBuilder.append(stack.pop());
             } else if (stringBuilder.toString().length() > 0) {
 
                 String keyChild = stringBuilder.reverse().toString();
-                if (keyChild.length() == 4) {
+                if (keyChild.length() == MessageConfig.keyLength/MessageConfig.packageNum) {
                     keyChilds.add(keyChild);
                     stringBuilder = new StringBuilder();
                 } else {
@@ -102,7 +102,7 @@ public class PackageUtil<T> {
             }
         }
         String keyChild = stringBuilder.reverse().toString();
-        if (keyChild.length() == 4) {
+        if (keyChild.length() == MessageConfig.keyLength/MessageConfig.packageNum) {
             keyChilds.add(keyChild);
             stringBuilder = new StringBuilder();
         } else {
@@ -110,7 +110,7 @@ public class PackageUtil<T> {
         }
         StringBuilder keyBuilder = new StringBuilder();
         for (String i : keyChilds) {
-            if (i.length() == 4) {
+            if (i.length() == MessageConfig.keyLength/MessageConfig.packageNum) {
                 keyBuilder.append(i);
             }
         }
@@ -134,7 +134,7 @@ public class PackageUtil<T> {
      * @param str
      */
     public static void errorBack(Stack stack, String str) {
-        for (char j : str.concat(getFlower(str)).toCharArray()) {
+        for (char j : getFlower(str).toCharArray()) {
             stack.push(j);
         }
     }
@@ -154,12 +154,18 @@ public class PackageUtil<T> {
         return str.concat(backBuilder.toString());
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String key = "1a2b3c4d5e6f7g8h";
-        ArrayList<String> keyChlids = PackageUtil.split(key, 4);
-        String content = "U2FsdGVkX1/cQqk8ASUI/XqmLRr23z3DXXTGGaBWLwE=";
-        String Package = PackageUtil.messagePackage(content, key);
+        String message="Hello World!";
+        String content1 =Encryption.encrypt(message,"UTF-8",key);
+        System.out.println("加密前的消息:"+message);
+        System.out.println("加密后的消息:"+content1);
+        String Package = PackageUtil.messagePackage(content1, key);
+        System.out.println("封装秘钥后的消息："+Package);
         Package pa = PackageUtil.getPackage(Package);
+        System.out.println("解封后的消息："+pa.message);
+        System.out.println("解封后的秘钥："+pa.key);
+        System.out.println( Encryption.decrypt(pa.message,"UTF-8",pa.key));
 
 
     }

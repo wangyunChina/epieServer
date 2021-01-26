@@ -15,5 +15,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 message:
   key:
+    length: 16
     package:
       number: 4
